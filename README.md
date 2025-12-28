@@ -38,80 +38,46 @@ A modern, production-ready event management application built with **Next.js 15*
 
 ---
 
+## 🧠 Key Assumptions & Decisions
 
-⚙️ Installation & Setup
-1️⃣ Environment Variables
+### **1. Universal Overlap Logic**
+To prevent double-booking, I implemented a mathematical interval check:
+`Conflict = (NewStart < ExistingEnd) AND (NewEnd > ExistingStart)`
+This ensures that even partial overlaps or back-to-back bookings are handled correctly.
 
-Create a .env file in the root directory:
+### **2. Database-Driven Reminders**
+I decided to store reminders as a separate table linked to events. This allows for:
+* **Timezone Accuracy**: All times are stored in UTC.
+* **Scalability**: The system is prepared for a Cron job to poll these entries and trigger notifications.
 
-DATABASE_URL=postgresql://user:password@endpoint/neondb?sslmode=require
-JWT_SECRET=your_secure_random_string
+### **3. AI as a Technical Partner**
+I utilized AI throughout the development lifecycle to:
+* **Optimize Formulae**: Refining the conflict detection logic for performance.
+* **Debug Deployment**: Identifying a specific JSON syntax error at position 266 in `package.json` that was halting the Vercel build.
 
-2️⃣ Database Initialization
+---
 
-npm install
-npx prisma migrate dev --name init
-This initializes the PostgreSQL schema and Prisma migration history.
+## ⚠️ Known Limitations & Future Roadmap
 
+### **Current Limitations**
+* **Single Calendar**: Users are currently limited to one primary calendar.
+* **Internal Notifications**: Reminders exist in the database but do not yet trigger external emails (SMTP integration pending).
 
-🏃 Running the Application
+### **Future Improvements**
+1.  **Google Calendar Sync**: OAuth integration to import external events.
+2.  **Drag-and-Drop Interface**: For intuitive rescheduling on the dashboard.
+3.  **Collaborative Calendars**: Allowing multiple users to view and edit a shared team calendar.
 
-Run two terminals simultaneously:
-Terminal 1 – Web Application
+---
 
-npm run dev
-Access at: http://localhost:3000
+## 📝 Experience Report: Working on this Project
+Working on this system was an insightful journey into **Next.js 15's** new paradigms. The most challenging aspect was synchronizing the local environment with the production server. 
 
-Terminal 2 – Reminder Worker
+**Key Learning Moments:**
+* **Environment Security**: Resolving "Internal Server Errors" by correctly configuring `JWT_SECRET` and `DATABASE_URL` within the Vercel dashboard.
+* **CI/CD Pipeline**: Learning how a single trailing comma in a configuration file can disrupt a production deployment, and using build logs to solve it efficiently.
 
-npm run reminders
-Runs the background cron process.
-
-🔔 How the Reminder System Works
-Creation: When an event is created, the system calculates remindAt based on user preference and stores it in UTC.
-
-Worker Execution: A Node-cron worker runs every minute.
-
-Polling: The worker fetches reminders where:
-
-remindAt <= currentTime
-sent = false
-Trigger & Update:
-The reminder is logged and marked as sent = true to prevent duplicate triggers.
-
-
-🧠 Key Design Decisions
-1️⃣ Robust Conflict Detection
-
-Implemented using interval overlap logic:
-An event conflicts if newStart < existingEnd AND newEnd > existingStart
-
-This covers:
-Partial overlaps
-Fully contained events
-Adjacent time slots
-
-2️⃣ Timezone-Safe Scheduling
-
-All event times are converted to UTC before saving
-Reminder calculations are also done in UTC
-Ensures consistent behavior across timezones
-
-
-
-⚠️ Current Limitations
-
-Single calendar per user
-Reminders are internal (terminal logs only)
-No email or SMS notifications yet
-
-🗺️ Future Enhancements
-
-Google Calendar Sync (OAuth)
-Drag-and-drop event rescheduling
-Shared calendars for teams/families
-Email notifications via Resend or SendGrid
-Cloud-based cron jobs for production
+---
 
 ## 📂 Project Structure
 
