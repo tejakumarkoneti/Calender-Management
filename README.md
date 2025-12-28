@@ -15,7 +15,6 @@ A modern, production-ready event management application built with **Next.js 15*
     * Full monthly view of events.
     * **Quick Creation:** Double-click any date to open the `CreateEventForm`.
     * **Edit & Update:** Single-click an event to modify titles or details.
-    * **Keyboard Shortcuts:** Press the `d` key while an event is selected to delete it.
 * **Automated Reminder System:**
     * Set reminders for 5, 10, or 30 minutes before an event.
     * **Background Worker:** A standalone Node-cron worker that monitors the database and triggers notifications.
