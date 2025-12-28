@@ -102,3 +102,44 @@ Trigger: It logs the notification to the terminal and marks the reminder as sent
 
 
 
+## 🧠 Key Features & Decisions
+
+### 1. Robust Conflict Detection
+One of the core challenges was ensuring that no two events overlap. I implemented a `hasConflict` utility that uses interval algebra. An event is flagged as a conflict if:
+- `(NewEventStart < ExistingEventEnd)` **AND** `(NewEventEnd > ExistingEventStart)`
+This formula handles partial overlaps, complete enclosures, and identical time slots.
+
+### 2. Timezone-Aware Reminders
+The system converts all user-input times to **UTC** before saving them to the database. When a user sets a reminder (e.g., "10 minutes before"), the system calculates the exact UTC timestamp for notification, ensuring accuracy regardless of the user's local timezone.
+
+### 3. AI-Assisted Debugging
+During development, AI acted as a technical thought partner. It helped:
+- Refactor the mathematical logic for event overlaps.
+- Diagnose a specific `package.json` syntax error at position 266 during the Vercel build process.
+- Transition a local background worker into a cloud-ready Vercel Cron Job architecture.
+
+---
+
+## ⚠️ Known Limitations
+While the core functionality is production-ready, there are certain limitations in this current version:
+* **One Calendar Per User:** Currently, the system supports a single primary calendar for each registered user.
+* **Internal Reminders Only:** Reminders are successfully generated as database entries, but the system does not yet send external notifications (Email/SMS/Push).
+
+---
+
+## 🗺️ Future Roadmap
+1.  **Google Calendar Sync:** Integrate OAuth and the Google Calendar API to allow users to sync external schedules.
+2.  **Drag-and-Drop UI:** Implement a more interactive dashboard where users can reschedule events by dragging them across a grid.
+3.  **Shared Calendars:** Enable collaboration features, allowing users to share specific calendars with teammates or family members.
+4.  **External Notification Service:** Connect the `Reminder` table to an email provider (like Resend or SendGrid) to trigger real-time alerts.
+
+---
+
+## ⚙️ Setup & Installation
+
+1. **Install Dependencies:**
+   ```bash
+   npm install
+
+
+
