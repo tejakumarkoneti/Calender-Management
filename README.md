@@ -38,46 +38,6 @@ A modern, production-ready event management application built with **Next.js 15*
 
 ---
 
-## 📂 Project Structure
-
-The project is organized following the Next.js App Router conventions:
-
-```text
-├── app/
-│   ├── api/
-│   │   ├── auth/            # Login & Register API routes
-│   │   └── events/          # Event CRUD & [id] routes
-│   ├── dashboard/           # Main Calendar UI Page
-│   ├── signup/              # Signup Page
-│   ├── layout.tsx           # Global Layout
-│   └── page.tsx             # Landing/Home Page
-├── components/              # Reusable UI Logic
-│   ├── CreateEventForm.tsx
-│   ├── EventList.tsx
-│   ├── LoginForm.tsx
-│   └── SignupForm.tsx
-├── jobs/
-│   └── reminderWorker.ts    # Background cron job for reminders
-├── lib/                     # Utility & Helper functions
-│   ├── api.ts               # Frontend API wrapper
-│   ├── auth.ts              # Auth helpers
-│   ├── jwt.ts               # JWT sign/verify logic
-│   └── prisma.ts            # Shared Prisma client
-├── prisma/
-│   └── schema.prisma        # Database schema (User, Event, Reminder)
-├── .env                     # Environment variables (DATABASE_URL, JWT_SECRET)
-└── next.config.ts           # Next.js configuration
-
-
-### **API Route Documentation**
-| Route | Method | Purpose |
-| :--- | :--- | :--- |
-| `/api/auth/register` | `POST` | User registration and account creation. |
-| `/api/auth/login` | `POST` | Secure login and JWT generation. |
-| `/api/events` | `GET/POST` | Fetching the calendar feed and creating new events with conflict checks. |
-| `/api/events/[id]` | `PUT/DELETE` | Updating specific event details or removing them from the schedule. |
-
-
 
 ⚙️ Installation & Setup
 1️⃣ Environment Variables
@@ -152,4 +112,43 @@ Drag-and-drop event rescheduling
 Shared calendars for teams/families
 Email notifications via Resend or SendGrid
 Cloud-based cron jobs for production
+
+## 📂 Project Structure
+
+The project is organized following the Next.js App Router conventions:
+
+```text
+├── app/
+│   ├── api/
+│   │   ├── auth/            # Login & Register API routes
+│   │   └── events/          # Event CRUD & [id] routes
+│   ├── dashboard/           # Main Calendar UI Page
+│   ├── signup/              # Signup Page
+│   ├── layout.tsx           # Global Layout
+│   └── page.tsx             # Landing/Home Page
+├── components/              # Reusable UI Logic
+│   ├── CreateEventForm.tsx
+│   ├── EventList.tsx
+│   ├── LoginForm.tsx
+│   └── SignupForm.tsx
+├── jobs/
+│   └── reminderWorker.ts    # Background cron job for reminders
+├── lib/                     # Utility & Helper functions
+│   ├── api.ts               # Frontend API wrapper
+│   ├── auth.ts              # Auth helpers
+│   ├── jwt.ts               # JWT sign/verify logic
+│   └── prisma.ts            # Shared Prisma client
+├── prisma/
+│   └── schema.prisma        # Database schema (User, Event, Reminder)
+├── .env                     # Environment variables (DATABASE_URL, JWT_SECRET)
+└── next.config.ts           # Next.js configuration
+
+
+### **API Route Documentation**
+| Route | Method | Purpose |
+| :--- | :--- | :--- |
+| `/api/auth/register` | `POST` | User registration and account creation. |
+| `/api/auth/login` | `POST` | Secure login and JWT generation. |
+| `/api/events` | `GET/POST` | Fetching the calendar feed and creating new events with conflict checks. |
+| `/api/events/[id]` | `PUT/DELETE` | Updating specific event details or removing them from the schedule. |
 
