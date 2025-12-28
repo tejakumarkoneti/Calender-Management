@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "reminders": "tsx ./jobs/reminderWorker.ts"
+    "reminders": "tsx ./jobs/reminderWorker.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
