@@ -68,78 +68,81 @@ The project is organized following the Next.js App Router conventions:
 ├── .env                     # Environment variables (DATABASE_URL, JWT_SECRET)
 └── next.config.ts           # Next.js configuration
 
+
+### **API Route Documentation**
+| Route | Method | Purpose |
+| :--- | :--- | :--- |
+| `/api/auth/register` | `POST` | User registration and account creation. |
+| `/api/auth/login` | `POST` | Secure login and JWT generation. |
+| `/api/events` | `GET/POST` | Fetching the calendar feed and creating new events with conflict checks. |
+| `/api/events/[id]` | `PUT/DELETE` | Updating specific event details or removing them from the schedule. |
+
+
+
 ⚙️ Installation & Setup
 1. Environment Variables
-Create a .env file in the root directory and add your credentials:
-  DATABASE_URL="postgresql://neondb_owner:npg_P8qRxHYZiIo2@ep-flat-band-adxtm1sp-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-  JWT_SECRET="your_jwt_secret_key"
+To get started, create a .env file in your root directory. This file stores your sensitive credentials. You will need to add your specific database connection string and a secret key for authentication:
+
+DATABASE_URL: Use your Neon PostgreSQL connection string (e.g., postgresql://user:password@endpoint/neondb?sslmode=require).
+
+JWT_SECRET: Define a secure, random string to be used as your JWT secret key.
 
 2. Database Initialization
-Install dependencies and push the schema to your PostgreSQL instance:
-  npm install
-  npx prisma migrate dev --name init
+Once your environment variables are set, you need to prepare the database. Follow these steps in your terminal:
+
+Run npm install to download all necessary project dependencies.
+
+Execute npx prisma migrate dev --name init to push your database schema to your PostgreSQL instance and initialize the tracking history.
 
 🏃 Running the Application
-You must run two separate terminals for the full system to function:
+To operate the full system, you must have two separate terminals running simultaneously:
 
-Terminal 1: Web App
-Starts the Next.js development server for the UI and API.
-npm run dev
-Access at: http://localhost:3000
+Terminal 1 (Web App): Run npm run dev. This starts the Next.js development server, allowing you to access the UI and API at http://localhost:3000.
 
-Terminal 2: Reminder Worker
-Starts the background process that checks for reminders every minute.
-npm run reminders
+Terminal 2 (Reminder Worker): Run npm run reminders. This activates the background process that monitors the database for upcoming notifications.
 
 🔔 How Reminders Work
-Creation: When an event is created, a remindAt timestamp is calculated and saved in the Database.
+The reminder system follows a four-step automated lifecycle:
 
-Worker: The script in jobs/reminderWorker.ts wakes up every minute using node-cron.
+Creation: When you create an event, the system calculates a remindAt timestamp based on your settings and saves it directly to the Database.
 
-Polling: It queries PostgreSQL for any unsent reminders where remindAt is less than or equal to the current time.
+Worker: A background script located in jobs/reminderWorker.ts stays active and "wakes up" every minute using a utility called node-cron.
 
-Trigger: It logs the notification to the terminal and marks the reminder as sent: true so it does not trigger again.
+Polling: The worker queries PostgreSQL to find any unsent reminders where the remindAt time is now or in the past.
 
+Trigger: Once a reminder is identified, it logs the notification to the terminal. The system then marks that reminder as sent: true so it is not triggered again.
 
+🧠 Key Features & Decisions
+1. Robust Conflict Detection
+To prevent the common headache of double-booking, I implemented a hasConflict utility using interval algebra. An event is flagged as a conflict if the new event starts before an existing one ends, and it ends after an existing one starts. This covers all scenarios, including partial overlaps and back-to-back meetings.
 
-## 🧠 Key Features & Decisions
+2. Timezone-Aware Reminders
+To ensure the calendar works globally, the system converts all user-input times to UTC before saving. When you set a reminder for "10 minutes before," the calculation happens in UTC, ensuring your notification is accurate no matter what timezone you are in.
 
-### 1. Robust Conflict Detection
-One of the core challenges was ensuring that no two events overlap. I implemented a `hasConflict` utility that uses interval algebra. An event is flagged as a conflict if:
-- `(NewEventStart < ExistingEventEnd)` **AND** `(NewEventEnd > ExistingEventStart)`
-This formula handles partial overlaps, complete enclosures, and identical time slots.
+3. AI-Assisted Debugging
+AI was utilized as a technical partner throughout the build to:
 
-### 2. Timezone-Aware Reminders
-The system converts all user-input times to **UTC** before saving them to the database. When a user sets a reminder (e.g., "10 minutes before"), the system calculates the exact UTC timestamp for notification, ensuring accuracy regardless of the user's local timezone.
+Refactor and verify the mathematical logic for event overlaps.
 
-### 3. AI-Assisted Debugging
-During development, AI acted as a technical thought partner. It helped:
-- Refactor the mathematical logic for event overlaps.
-- Diagnose a specific `package.json` syntax error at position 266 during the Vercel build process.
-- Transition a local background worker into a cloud-ready Vercel Cron Job architecture.
+Identify a specific "position 266" syntax error in the package.json file that blocked the Vercel deployment.
 
----
+Help transition the local worker logic into a structure ready for cloud-based Cron Jobs.
 
-## ⚠️ Known Limitations
-While the core functionality is production-ready, there are certain limitations in this current version:
-* **One Calendar Per User:** Currently, the system supports a single primary calendar for each registered user.
-* **Internal Reminders Only:** Reminders are successfully generated as database entries, but the system does not yet send external notifications (Email/SMS/Push).
+⚠️ Known Limitations
+1. Currently, the system has a few constraints intended for future updates:
 
----
+2. Single Calendar: Users are limited to one primary calendar per account.
 
-## 🗺️ Future Roadmap
-1.  **Google Calendar Sync:** Integrate OAuth and the Google Calendar API to allow users to sync external schedules.
-2.  **Drag-and-Drop UI:** Implement a more interactive dashboard where users can reschedule events by dragging them across a grid.
-3.  **Shared Calendars:** Enable collaboration features, allowing users to share specific calendars with teammates or family members.
-4.  **External Notification Service:** Connect the `Reminder` table to an email provider (like Resend or SendGrid) to trigger real-time alerts.
-
----
-
-## ⚙️ Setup & Installation
-
-1. **Install Dependencies:**
-   ```bash
-   npm install
+3. Internal Alerts: Reminders currently function as database entries and terminal logs; they do not yet send external emails or SMS.
 
 
+🗺️ Future Roadmap
+I plan to expand the system with the following features:
 
+1. Google Calendar Sync: Integrating OAuth to allow users to import and export external schedules.
+
+2. Drag-and-Drop UI: Adding an interactive grid dashboard for easier rescheduling.
+
+3. Shared Calendars: Enabling collaboration features so teams or families can view shared schedules.
+
+4. External Notifications: Connecting the database to providers like Resend or SendGrid for real-time email alerts.
