@@ -77,36 +77,6 @@ Working on this system was an insightful journey into **Next.js 15's** new parad
 * **Environment Security**: Resolving "Internal Server Errors" by correctly configuring `JWT_SECRET` and `DATABASE_URL` within the Vercel dashboard.
 * **CI/CD Pipeline**: Learning how a single trailing comma in a configuration file can disrupt a production deployment, and using build logs to solve it efficiently.
 
-⚙️ Setup to Run the Code
-To initialize the project and get the full system operational, execute the following commands in your terminal:
-
-Bash
-
-# 1. Install all project dependencies
-npm install
-
-# 2. Sync the Prisma schema with your Neon PostgreSQL database
-# This pushes your local model definitions to the cloud
-npx prisma migrate dev --name init
-
-# 3. Generate the Prisma Client
-# This creates the type-safe functions used in your code
-npx prisma generate
-
-# 4. Start the Web Application (Terminal 1)
-npm run dev
-
-# 5. Start the Reminder Worker (Terminal 2)
-npm run reminders
-
-🔑 .env Setup
-Create a .env file in your root directory. This file is essential for connecting your application to the database and enabling security features. Add the following lines:
-
-# Database connection for Neon.tech (Use the pooled connection string)
-DATABASE_URL="postgresql://neondb_owner:npg_oxVrbhG3z5FU@ep-soft-river-ahek0pkp-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-
-# Secret key for JWT Authentication (Used to sign user sessions)
-JWT_SECRET="your_jwt_secret_key"
 
 
 
@@ -148,4 +118,31 @@ The project is organized following the Next.js App Router conventions:
 | `/api/auth/login` | `POST` | Secure login and JWT generation. |
 | `/api/events` | `GET/POST` | Fetching the calendar feed and creating new events with conflict checks. |
 | `/api/events/[id]` | `PUT/DELETE` | Updating specific event details or removing them from the schedule. |
+
+
+⚙️ Installation & Setup
+1. Environment Variables
+Create a .env file in the root directory and add your credentials:
+
+DATABASE_URL="postgresql://neondb_owner:npg_oxVrbhG3z5FU@ep-soft-river-ahek0pkp-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+JWT_SECRET="your_jwt_secret_key"
+
+2. Database Initialization
+Install dependencies and push the schema to your PostgreSQL instance:
+
+npm install
+npx prisma migrate dev --name init
+
+🏃 Running the Application
+You must run two separate terminals for the full system to function:
+
+Terminal 1: Web App
+Starts the Next.js development server for the UI and API.
+
+npm run dev
+Access at: http://localhost:3000
+
+Terminal 2: Reminder Worker
+Starts the background process that checks for reminders every minute.
+npm run reminders
 
