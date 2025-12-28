@@ -80,69 +80,76 @@ The project is organized following the Next.js App Router conventions:
 
 
 ⚙️ Installation & Setup
-1. Environment Variables
-To get started, create a .env file in your root directory. This file stores your sensitive credentials. You will need to add your specific database connection string and a secret key for authentication:
+1️⃣ Environment Variables
 
-DATABASE_URL: Use your Neon PostgreSQL connection string (e.g., postgresql://user:password@endpoint/neondb?sslmode=require).
+Create a .env file in the root directory:
 
-JWT_SECRET: Define a secure, random string to be used as your JWT secret key.
+DATABASE_URL=postgresql://user:password@endpoint/neondb?sslmode=require
+JWT_SECRET=your_secure_random_string
 
-2. Database Initialization
-Once your environment variables are set, you need to prepare the database. Follow these steps in your terminal:
+2️⃣ Database Initialization
 
-Run npm install to download all necessary project dependencies.
+npm install
+npx prisma migrate dev --name init
+This initializes the PostgreSQL schema and Prisma migration history.
 
-Execute npx prisma migrate dev --name init to push your database schema to your PostgreSQL instance and initialize the tracking history.
 
 🏃 Running the Application
-To operate the full system, you must have two separate terminals running simultaneously:
 
-Terminal 1 (Web App): Run npm run dev. This starts the Next.js development server, allowing you to access the UI and API at http://localhost:3000.
+Run two terminals simultaneously:
+Terminal 1 – Web Application
 
-Terminal 2 (Reminder Worker): Run npm run reminders. This activates the background process that monitors the database for upcoming notifications.
+npm run dev
+Access at: http://localhost:3000
 
-🔔 How Reminders Work
-The reminder system follows a four-step automated lifecycle:
+Terminal 2 – Reminder Worker
 
-Creation: When you create an event, the system calculates a remindAt timestamp based on your settings and saves it directly to the Database.
+npm run reminders
+Runs the background cron process.
 
-Worker: A background script located in jobs/reminderWorker.ts stays active and "wakes up" every minute using a utility called node-cron.
+🔔 How the Reminder System Works
+Creation: When an event is created, the system calculates remindAt based on user preference and stores it in UTC.
 
-Polling: The worker queries PostgreSQL to find any unsent reminders where the remindAt time is now or in the past.
+Worker Execution: A Node-cron worker runs every minute.
 
-Trigger: Once a reminder is identified, it logs the notification to the terminal. The system then marks that reminder as sent: true so it is not triggered again.
+Polling: The worker fetches reminders where:
 
-🧠 Key Features & Decisions
-1. Robust Conflict Detection
-To prevent the common headache of double-booking, I implemented a hasConflict utility using interval algebra. An event is flagged as a conflict if the new event starts before an existing one ends, and it ends after an existing one starts. This covers all scenarios, including partial overlaps and back-to-back meetings.
-
-2. Timezone-Aware Reminders
-To ensure the calendar works globally, the system converts all user-input times to UTC before saving. When you set a reminder for "10 minutes before," the calculation happens in UTC, ensuring your notification is accurate no matter what timezone you are in.
-
-3. AI-Assisted Debugging
-AI was utilized as a technical partner throughout the build to:
-
-Refactor and verify the mathematical logic for event overlaps.
-
-Identify a specific "position 266" syntax error in the package.json file that blocked the Vercel deployment.
-
-Help transition the local worker logic into a structure ready for cloud-based Cron Jobs.
-
-⚠️ Known Limitations
-1. Currently, the system has a few constraints intended for future updates:
-
-2. Single Calendar: Users are limited to one primary calendar per account.
-
-3. Internal Alerts: Reminders currently function as database entries and terminal logs; they do not yet send external emails or SMS.
+remindAt <= currentTime
+sent = false
+Trigger & Update:
+The reminder is logged and marked as sent = true to prevent duplicate triggers.
 
 
-🗺️ Future Roadmap
-I plan to expand the system with the following features:
+🧠 Key Design Decisions
+1️⃣ Robust Conflict Detection
 
-1. Google Calendar Sync: Integrating OAuth to allow users to import and export external schedules.
+Implemented using interval overlap logic:
+An event conflicts if newStart < existingEnd AND newEnd > existingStart
 
-2. Drag-and-Drop UI: Adding an interactive grid dashboard for easier rescheduling.
+This covers:
+Partial overlaps
+Fully contained events
+Adjacent time slots
 
-3. Shared Calendars: Enabling collaboration features so teams or families can view shared schedules.
+2️⃣ Timezone-Safe Scheduling
 
-4. External Notifications: Connecting the database to providers like Resend or SendGrid for real-time email alerts.
+All event times are converted to UTC before saving
+Reminder calculations are also done in UTC
+Ensures consistent behavior across timezones
+
+
+
+⚠️ Current Limitations
+
+Single calendar per user
+Reminders are internal (terminal logs only)
+No email or SMS notifications yet
+
+🗺️ Future Enhancements
+
+Google Calendar Sync (OAuth)
+Drag-and-drop event rescheduling
+Shared calendars for teams/families
+Email notifications via Resend or SendGrid
+Cloud-based cron jobs for production
+
